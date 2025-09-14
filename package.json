@@ -1,0 +1,37 @@
+{
+  "name": "intext",
+  "version": "0.0.1",
+  "description": "Package to extract JSON from long text using sliding-window chunking and user-supplied LLM client",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p .",
+    "dev": "tsc -w",
+    "test": "ts-node test/extract.test.ts",
+    "examples:basic": "ts-node examples/basic-example.ts",
+    "examples:meeting": "ts-node examples/meeting-analysis.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "llm",
+    "extraction",
+    "chunking",
+    "typescript",
+    "json"
+  ],
+  "author": "zhf",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.19.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "token-estimator": "^1.0.2"
+  }
+}

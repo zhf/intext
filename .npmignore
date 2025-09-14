@@ -1,0 +1,78 @@
+# Test files
+test/
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/
+
+# Example files (development only)
+examples/
+example.ts
+
+# Build output - KEEP dist/ for npm publishing
+# Source files - KEEP src/ for transparency and debugging
+
+# TypeScript
+*.tsbuildinfo
+
+# Development files
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# Documentation
+*.md
+!README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/
+coverage/
+
+# Tooling
+.nyc_output
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env*
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git
+.git/
+.gitignore
+
+# npm
+.npmignore
+package-lock.json
+yarn.lock
+
+
+# Vibe coders
+.claude
+.codex
+.cursor
