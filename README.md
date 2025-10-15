@@ -109,6 +109,11 @@ const schema: SchemaField = {
         },
       },
     },
+    status: {
+      type: "string",
+      description: "overall state",
+      enum: ["open", "blocked", "done"],
+    },
   },
 };
 
@@ -178,19 +183,36 @@ Returns an object with:
 ### Types
 
 ```ts
-export type SchemaField = {
+type SchemaEnumValue = string | number | boolean | null;
+
+type SchemaNodeBase = {
+  description?: string;
+  enum?: SchemaEnumValue[];
+};
+
+type PrimitiveSchemaNode = SchemaNodeBase & {
+  type: "string" | "number" | "boolean";
+};
+
+type ArraySchemaNode = SchemaNodeBase & {
+  type: "array";
+  items: SchemaNode;
+};
+
+type ObjectSchemaNode = SchemaNodeBase & {
   type: "object";
-  properties: {
-    [key: string]: {
-      type: "string" | "array" | "object" | "number" | "boolean";
-      description?: string;
-      items?: SchemaField;
-      properties?: Record<string, SchemaField>;
-    };
-  };
+  properties: Record<string, SchemaNode>;
   required?: string[];
 };
 
+export type SchemaNode = PrimitiveSchemaNode | ArraySchemaNode | ObjectSchemaNode;
+
+export type SchemaField = ObjectSchemaNode;
+```
+
+`enum` constrains a field (or array items) to a set of literal values. `intext` includes these hints in the prompts and drops per‑chunk values that fall outside the allowed set.
+
+```ts
 export type ExtractOptions = {
   schema: SchemaField;
   chunkTokens?: number;    // default 1500

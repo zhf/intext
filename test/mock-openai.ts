@@ -13,7 +13,8 @@ export function createMockOpenAI() {
           if (content.startsWith("You are a JSON reducer")) {
             const finalJson = {
               issue: "Combined issue from chunks",
-              next_moves: [ { text: "Do X" }, { text: "Do Y" } ]
+              next_moves: [ { text: "Do X" }, { text: "Do Y" } ],
+              status: "closed"
             };
             return {
               choices: [
@@ -28,16 +29,26 @@ export function createMockOpenAI() {
           if (content.includes("CHUNK1")) {
             issue = "Issue A";
             nextMoves = [{ text: "Do X" }];
+            return {
+              choices: [
+                { message: { content: JSON.stringify({ issue, next_moves: nextMoves, status: "unknown" }) } }
+              ]
+            };
           } else if (content.includes("CHUNK2")) {
             issue = "Issue B";
             nextMoves = [{ text: "Do Y" }];
+            return {
+              choices: [
+                { message: { content: JSON.stringify({ issue, next_moves: nextMoves, status: "closed" }) } }
+              ]
+            };
           } else {
             // default minimal response
             issue = null;
             nextMoves = [];
           }
 
-          const perChunk = { issue, next_moves: nextMoves };
+          const perChunk = { issue, next_moves: nextMoves, status: null };
           return {
             choices: [
               { message: { content: JSON.stringify(perChunk) } }

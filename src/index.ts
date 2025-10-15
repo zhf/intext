@@ -11,18 +11,39 @@ import { buildChunks, defaultTokenizer, Chunk } from './chunking';
 export type { Chunk };
 
 
-export type SchemaField = {
+type SchemaEnumValue = string | number | boolean | null;
+
+type BaseSchemaNode = {
+  description?: string;
+  enum?: SchemaEnumValue[];
+};
+
+export type StringSchemaNode = BaseSchemaNode & {
+  type: "string";
+};
+
+export type NumberSchemaNode = BaseSchemaNode & {
+  type: "number";
+};
+
+export type BooleanSchemaNode = BaseSchemaNode & {
+  type: "boolean";
+};
+
+export type ArraySchemaNode = BaseSchemaNode & {
+  type: "array";
+  items: SchemaNode;
+};
+
+export type ObjectSchemaNode = BaseSchemaNode & {
   type: "object";
-  properties: {
-    [key: string]: {
-      type: "string" | "array" | "object" | "number" | "boolean";
-      description?: string;
-      items?: SchemaField;
-      properties?: Record<string, SchemaField>;
-    };
-  };
+  properties: Record<string, SchemaNode>;
   required?: string[];
 };
+
+export type SchemaNode = StringSchemaNode | NumberSchemaNode | BooleanSchemaNode | ArraySchemaNode | ObjectSchemaNode;
+
+export type SchemaField = ObjectSchemaNode;
 
 export type ExtractOptions = {
   schema: SchemaField;
@@ -81,6 +102,25 @@ function debugLog(message: string, debugEnabled: boolean) {
   }
 }
 
+function formatEnumValues(values: SchemaEnumValue[]): string {
+  return values.map((value) => JSON.stringify(value)).join(", ");
+}
+
+function describeField(fieldId: string, field: SchemaNode): string {
+  const hints: string[] = [];
+  if (field.description) {
+    hints.push(field.description);
+  }
+  if (field.enum && field.enum.length) {
+    hints.push(`allowed values: ${formatEnumValues(field.enum)}`);
+  } else if (field.type === "array" && field.items.enum && field.items.enum.length) {
+    hints.push(`allowed item values: ${formatEnumValues(field.items.enum)}`);
+  }
+
+  const hint = hints.length ? ` Hint: ${hints.join("; ")}` : "";
+  return `- "${fieldId}" (${field.type})${hint}`;
+}
+
 /**
  * Factory to create the intext extractor.
  * Must be provided an OpenAI client instance and preferred params.
@@ -93,10 +133,7 @@ export function createIntext(params: { openai: OpenAICompatibleClient; clientPar
   function buildPromptForChunk(chunk: Chunk, schema: SchemaField) {
     // Build a focused extraction prompt that asks the LLM to return JSON only.
     const fieldInstr = Object.entries(schema.properties)
-      .map(([fieldId, field]) => {
-        const hint = field.description ? ` Hint: ${field.description}` : "";
-        return `- "${fieldId}" (${field.type})${hint}`;
-      })
+      .map(([fieldId, field]) => describeField(fieldId, field))
       .join("\n");
 
     const prompt = `You are a JSON extractor. Given the CHUNK of meeting/transcript text, extract the following fields and return EXACTLY valid JSON and nothing else.
@@ -230,7 +267,26 @@ CHUNK:
         // Normalize parsed to expected schema keys (absent -> null)
         const normalized: Record<string, any> = {};
         for (const [fieldId, field] of Object.entries(schema.properties)) {
-          normalized[fieldId] = parsed.hasOwnProperty(fieldId) ? parsed[fieldId] : null;
+          const hasField = Object.prototype.hasOwnProperty.call(parsed, fieldId);
+          let value = hasField ? parsed[fieldId] : null;
+
+          if (field.enum && value !== null && value !== undefined) {
+            const matchesEnum = field.enum.some((allowed) => Object.is(allowed, value as SchemaEnumValue));
+            if (!matchesEnum) {
+              value = null;
+            }
+          }
+
+          if (field.type === "array" && Array.isArray(value)) {
+            const itemEnum = field.items.enum;
+            if (itemEnum && itemEnum.length && field.items.type !== "object" && field.items.type !== "array") {
+              value = value.filter((entry: unknown) =>
+                itemEnum.some((allowed) => Object.is(allowed, entry as SchemaEnumValue))
+              );
+            }
+          }
+
+          normalized[fieldId] = value === undefined ? null : value;
         }
         const cr: ChunkResult = { chunkId: chunk.id, parsed: normalized, raw: rawRespStr };
         rawResults.push(cr);

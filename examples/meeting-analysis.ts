@@ -42,6 +42,11 @@ import { readFileSync } from "fs";
       timeline_impact: {
         type: "string",
         description: "summary of how disputes affect project timeline and deadlines"
+      },
+      project_status: {
+        type: "string",
+        description: "overall health of the project as decided in the meeting",
+        enum: ["on_track", "at_risk", "blocked"]
       }
     }
   };
@@ -108,6 +113,9 @@ import { readFileSync } from "fs";
 
     console.log(`\n=== Timeline Impact ===`);
     console.log(res.json.timeline_impact || "No timeline impact identified");
+
+    console.log(`\n=== Project Status ===`);
+    console.log(res.json.project_status || "No status recorded");
 
   } catch (error) {
     console.error("Error reading transcript file:", error);

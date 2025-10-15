@@ -25,6 +25,11 @@ async function run() {
           },
         },
       },
+      status: {
+        type: "string",
+        description: "overall outcome",
+        enum: ["open", "closed"],
+      },
     },
   };
 
@@ -47,6 +52,13 @@ async function run() {
   const texts = res.json.next_moves.map((x: any) => x.text);
   if (!(texts.includes("Do X") && texts.includes("Do Y"))) {
     throw new Error(`Expected next_moves to include Do X and Do Y, got: ${JSON.stringify(texts)}`);
+  }
+  if (res.json.status !== "closed") {
+    throw new Error(`Expected status to be 'closed' but got: ${res.json.status}`);
+  }
+  const chunkStatuses = res.metadata.rawChunkResults.map((x) => x.parsed.status);
+  if (!(chunkStatuses.includes(null) && chunkStatuses.includes("closed"))) {
+    throw new Error(`Expected chunk statuses to include null and "closed", got: ${JSON.stringify(chunkStatuses)}`);
   }
 
   console.log("All tests passed");

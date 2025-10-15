@@ -132,6 +132,12 @@
 
 **Sarah Johnson:** We'll need to compress that timeline. I'm hoping that once data integration is complete, we can parallelize some testing efforts.
 
+**Sarah Johnson:** With the current risks and compressed schedule, I'm marking the overall project status as "at_risk" for this sprint so everyone has a shared reference point.
+
+**Michael Chen:** Noted. I'll record the project status as at_risk in the minutes, and we can aim to return to "on_track" once the integration layer settles.
+
+**David Rodriguez:** Let's treat "blocked" as our escalation trigger—if integrations slip again, we bring in the mediation team immediately.
+
 **David Rodriguez:** We might need to consider automated testing to speed things up.
 
 **Amanda Patel:** We've already implemented a lot of automation, but integration tests require manual validation of data quality.
