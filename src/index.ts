@@ -150,6 +150,8 @@ For each field:
 
 Also include for each field an optional "_confidence_<fieldId>" numeric value between 0.0 and 1.0 representing the model's confidence (if you can estimate), otherwise you may omit it.
 
+Generate all string values in the SAME language as the input text.
+
 CHUNK:
 """${chunk.text}"""
 `;
@@ -181,6 +183,7 @@ CHUNK:
     const schemaJson = JSON.stringify(schema, null, 2);
 
     let prompt = `You are a JSON reducer. Given the SCHEMA and the per-chunk extraction results, produce the final JSON object that conforms to the SCHEMA. Return EXACTLY valid JSON and nothing else.\n\n`;
+    prompt += `Generate all string values in the same language as the source text in the chunks.\n\n`;
     prompt += `SCHEMA (JSON Schema-like, target shape):\n${schemaJson}\n\n`;
     prompt += `CHUNK RESULTS (only non-null fields shown):\n`;
     compacted.forEach((cr, idx) => {

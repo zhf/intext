@@ -1,6 +1,6 @@
 {
   "name": "intext",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Package to extract JSON from long text using sliding-window chunking and user-supplied LLM client",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
